@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { toZonedTime } from "date-fns-tz";
 import axios from "axios";
+
+const TIMEZONE = "America/New_York";
 
 export async function GET(request: NextRequest) {
   try {
@@ -45,20 +48,16 @@ export async function GET(request: NextRequest) {
     let trainingLoad = { acute: 0, chronic: 0, ratio: 0 };
 
     if (Array.isArray(activities)) {
-      // Calculate last 7 days (acute) vs last 28 days (chronic)
-      const now = new Date();
-      const last7Days = activities.filter(
-        (a: any) =>
-          (now.getTime() - new Date(a.start_date).getTime()) /
-            (1000 * 60 * 60 * 24) <=
-          7
-      );
-      const last28Days = activities.filter(
-        (a: any) =>
-          (now.getTime() - new Date(a.start_date).getTime()) /
-            (1000 * 60 * 60 * 24) <=
-          28
-      );
+      // Calculate last 7 days (acute) vs last 28 days (chronic) in EST
+      const nowEST = toZonedTime(new Date(), TIMEZONE);
+      const last7Days = activities.filter((a: any) => {
+        const activityEST = toZonedTime(new Date(a.start_date), TIMEZONE);
+        return (nowEST.getTime() - activityEST.getTime()) / (1000 * 60 * 60 * 24) <= 7;
+      });
+      const last28Days = activities.filter((a: any) => {
+        const activityEST = toZonedTime(new Date(a.start_date), TIMEZONE);
+        return (nowEST.getTime() - activityEST.getTime()) / (1000 * 60 * 60 * 24) <= 28;
+      });
 
       const acuteLoad =
         last7Days.reduce((sum: number, a: any) => sum + (a.moving_time || 0), 0) /

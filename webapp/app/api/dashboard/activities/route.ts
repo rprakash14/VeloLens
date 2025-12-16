@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { subDays } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import axios from "axios";
+
+const TIMEZONE = "America/New_York";
 
 export async function GET(request: NextRequest) {
   try {
@@ -31,11 +34,13 @@ export async function GET(request: NextRequest) {
 
     const activities = response.data;
 
-    // Filter activities by date (last N days)
-    const cutoffDate = subDays(new Date(), days);
+    // Filter activities by date (last N days in EST)
+    const nowEST = toZonedTime(new Date(), TIMEZONE);
+    const cutoffDate = subDays(nowEST, days);
     const filteredActivities = Array.isArray(activities)
       ? activities.filter((activity: any) => {
-          return new Date(activity.start_date) > cutoffDate;
+          const activityDateEST = toZonedTime(new Date(activity.start_date), TIMEZONE);
+          return activityDateEST > cutoffDate;
         })
       : [];
 

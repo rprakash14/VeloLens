@@ -1,4 +1,8 @@
 import { format, subDays, startOfWeek, startOfMonth, startOfYear } from "date-fns";
+import { toZonedTime, formatInTimeZone } from "date-fns-tz";
+
+// US Eastern timezone
+const TIMEZONE = "America/New_York";
 
 // Format distance from meters to kilometers
 export function formatDistance(meters: number): string {
@@ -89,22 +93,27 @@ export function getDateRange(period: "week" | "month" | "year"): { start: Date; 
   return { start, end };
 }
 
-// Format date for display
+// Format date for display (converts UTC to EST)
 export function formatDate(dateString: string): string {
-  return format(new Date(dateString), "MMM d, yyyy");
+  return formatInTimeZone(new Date(dateString), TIMEZONE, "MMM d, yyyy 'at' h:mm a");
 }
 
-// Format date for chart labels
+// Helper to convert UTC date to EST Date object
+export function toESTDate(dateString: string): Date {
+  return utcToZonedTime(new Date(dateString), TIMEZONE);
+}
+
+// Format date for chart labels (converts UTC to EST)
 export function formatChartDate(dateString: string, period: "week" | "month" | "year"): string {
-  const date = new Date(dateString);
+  const estDate = utcToZonedTime(new Date(dateString), TIMEZONE);
 
   switch (period) {
     case "week":
-      return format(date, "EEE"); // Mon, Tue, etc.
+      return format(estDate, "EEE"); // Mon, Tue, etc.
     case "month":
-      return format(date, "MMM d"); // Jan 1, etc.
+      return format(estDate, "MMM d"); // Jan 1, etc.
     case "year":
-      return format(date, "MMM"); // Jan, Feb, etc.
+      return format(estDate, "MMM"); // Jan, Feb, etc.
   }
 }
 

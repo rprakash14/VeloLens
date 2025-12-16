@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { format, subDays, subMonths, subYears, eachDayOfInterval, eachMonthOfInterval } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import axios from "axios";
+
+const TIMEZONE = "America/New_York";
 
 export async function GET(request: NextRequest) {
   try {
@@ -59,13 +62,14 @@ export async function GET(request: NextRequest) {
 
     const activities = response.data;
 
-    // Aggregate activities by date
+    // Aggregate activities by date (convert UTC to EST)
     const trendsMap = new Map<string, { distance: number; elevation: number; count: number }>();
 
     if (Array.isArray(activities)) {
       activities.forEach((activity: any) => {
-        const activityDate = new Date(activity.start_date);
-        const dateKey = format(activityDate, dateFormat);
+        const utcDate = new Date(activity.start_date);
+        const estDate = toZonedTime(utcDate, TIMEZONE);
+        const dateKey = format(estDate, dateFormat);
 
         const existing = trendsMap.get(dateKey) || { distance: 0, elevation: 0, count: 0 };
 
