@@ -8,17 +8,14 @@ import PerformanceMetrics from "./PerformanceMetrics";
 import TrendCharts from "./TrendCharts";
 
 export default function Dashboard() {
-  const stravaData = useStravaData();
-  const { refreshAll, isLoading, units, toggleUnits } = stravaData;
+  const { refreshAll, isLoading, units, toggleUnits } = useStravaData();
 
   useEffect(() => {
-    // Auto-fetch all data on mount
     refreshAll();
   }, [refreshAll]);
 
   return (
     <div className="h-full overflow-y-auto bg-gray-50">
-      {/* Header */}
       <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-4 shadow-lg sticky top-0 z-10">
         <div className="flex items-center justify-between">
           <div>
@@ -26,7 +23,6 @@ export default function Dashboard() {
             <p className="text-sm opacity-90">Your Strava activity analytics</p>
           </div>
           <div className="flex items-center gap-2">
-            {/* Unit Toggle Button */}
             <button
               onClick={toggleUnits}
               className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2"
@@ -47,7 +43,6 @@ export default function Dashboard() {
                 />
               </svg>
             </button>
-            {/* Refresh Button */}
             <button
               onClick={() => refreshAll(true)}
               disabled={isLoading}
@@ -68,23 +63,20 @@ export default function Dashboard() {
               </svg>
               Refresh
             </button>
+          </div>
         </div>
       </div>
 
-      {/* Dashboard Content */}
       <div className="p-4 space-y-6">
-        {/* Summary Stats */}
         <section>
           <SummaryStats />
         </section>
 
-        {/* Activity Feed and Performance Metrics */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <ActivityFeed />
           <PerformanceMetrics />
         </section>
 
-        {/* Trend Charts */}
         <section>
           <TrendCharts />
         </section>
