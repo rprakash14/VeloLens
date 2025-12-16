@@ -81,6 +81,15 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     console.error("Performance API error:", error);
+
+    // Handle Strava rate limiting
+    if (error.response?.status === 429) {
+      return NextResponse.json(
+        { error: "Strava API rate limit exceeded. Please try again in a few minutes." },
+        { status: 429 }
+      );
+    }
+
     return NextResponse.json(
       { error: error.message || "Internal server error" },
       { status: 500 }
