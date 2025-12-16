@@ -100,12 +100,12 @@ export function formatDate(dateString: string): string {
 
 // Helper to convert UTC date to EST Date object
 export function toESTDate(dateString: string): Date {
-  return utcToZonedTime(new Date(dateString), TIMEZONE);
+  return toZonedTime(new Date(dateString), TIMEZONE);
 }
 
 // Format date for chart labels (converts UTC to EST)
 export function formatChartDate(dateString: string, period: "week" | "month" | "year"): string {
-  const estDate = utcToZonedTime(new Date(dateString), TIMEZONE);
+  const estDate = toZonedTime(new Date(dateString), TIMEZONE);
 
   switch (period) {
     case "week":
