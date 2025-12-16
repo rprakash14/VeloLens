@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useStravaData } from "@/contexts/StravaDataContext";
 import { formatChartDate } from "@/lib/dashboard-utils";
+import { convertDistance, convertElevation } from "@/lib/units";
 import {
   LineChart,
   Line,
@@ -19,7 +20,7 @@ import {
 import { TrendPeriod } from "@/types/strava";
 
 export default function TrendCharts() {
-  const { trends, trendPeriod, refreshTrends, isLoading, error } = useStravaData();
+  const { trends, trendPeriod, refreshTrends, isLoading, error, units } = useStravaData();
   const [selectedPeriod, setSelectedPeriod] = useState<TrendPeriod>(trendPeriod);
 
   const handlePeriodChange = async (period: TrendPeriod) => {
@@ -58,12 +59,21 @@ export default function TrendCharts() {
     );
   }
 
-  // Prepare chart data with formatted labels
-  const chartData = trends.map((point) => ({
-    ...point,
-    label: formatChartDate(point.date, selectedPeriod),
-    distanceKm: (point.distance / 1000).toFixed(1),
-  }));
+  // Prepare chart data with formatted labels and converted units
+  const distanceUnit = units === "metric" ? "km" : "mi";
+  const elevationUnit = units === "metric" ? "m" : "ft";
+
+  const chartData = trends.map((point) => {
+    const distance = convertDistance(point.distance, units);
+    const elevation = convertElevation(point.elevation, units);
+
+    return {
+      ...point,
+      label: formatChartDate(point.date, selectedPeriod),
+      distanceValue: parseFloat(distance.value.toFixed(1)),
+      elevationValue: Math.round(elevation.value),
+    };
+  });
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
@@ -106,19 +116,21 @@ export default function TrendCharts() {
       <div className="space-y-6">
         {/* Distance Chart */}
         <div>
-          <h4 className="text-sm font-semibold text-gray-700 mb-2">Distance (km)</h4>
+          <h4 className="text-sm font-semibold text-gray-700 mb-2">
+            Distance ({distanceUnit})
+          </h4>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="label" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip
-                formatter={(value: number) => `${value} km`}
+                formatter={(value: number) => `${value} ${distanceUnit}`}
                 labelStyle={{ color: "#374151" }}
               />
               <Line
                 type="monotone"
-                dataKey="distanceKm"
+                dataKey="distanceValue"
                 stroke="#f97316"
                 strokeWidth={2}
                 dot={{ fill: "#f97316", r: 4 }}
@@ -130,17 +142,19 @@ export default function TrendCharts() {
 
         {/* Elevation Chart */}
         <div>
-          <h4 className="text-sm font-semibold text-gray-700 mb-2">Elevation Gain (m)</h4>
+          <h4 className="text-sm font-semibold text-gray-700 mb-2">
+            Elevation Gain ({elevationUnit})
+          </h4>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="label" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip
-                formatter={(value: number) => `${Math.round(value)} m`}
+                formatter={(value: number) => `${Math.round(value)} ${elevationUnit}`}
                 labelStyle={{ color: "#374151" }}
               />
-              <Bar dataKey="elevation" fill="#ef4444" radius={[8, 8, 0, 0]} />
+              <Bar dataKey="elevationValue" fill="#ef4444" radius={[8, 8, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

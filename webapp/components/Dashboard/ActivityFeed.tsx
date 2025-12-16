@@ -2,16 +2,15 @@
 
 import { useStravaData } from "@/contexts/StravaDataContext";
 import {
-  formatDistance,
   formatTime,
-  formatElevation,
   formatDate,
   getActivityEmoji,
   getActivityColor,
 } from "@/lib/dashboard-utils";
+import { formatDistance, formatElevation } from "@/lib/units";
 
 export default function ActivityFeed() {
-  const { activities, isLoading, error } = useStravaData();
+  const { activities, isLoading, error, units } = useStravaData();
 
   if (isLoading) {
     return (
@@ -84,7 +83,7 @@ export default function ActivityFeed() {
                   <div>
                     <span className="text-gray-600">Distance: </span>
                     <span className="font-medium">
-                      {formatDistance(activity.distance)}
+                      {formatDistance(activity.distance, units)}
                     </span>
                   </div>
                   <div>
@@ -97,7 +96,7 @@ export default function ActivityFeed() {
                     <div>
                       <span className="text-gray-600">Elevation: </span>
                       <span className="font-medium">
-                        {formatElevation(activity.total_elevation_gain)}
+                        {formatElevation(activity.total_elevation_gain, units)}
                       </span>
                     </div>
                   )}

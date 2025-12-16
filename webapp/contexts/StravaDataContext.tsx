@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from "react";
 import {
   StravaDataContextType,
   SummaryStats,
@@ -9,6 +9,7 @@ import {
   TrendDataPoint,
   TrendPeriod,
 } from "@/types/strava";
+import { UnitSystem } from "@/lib/units";
 
 const StravaDataContext = createContext<StravaDataContextType | undefined>(undefined);
 
@@ -20,6 +21,15 @@ export function StravaDataProvider({ children }: { children: ReactNode }) {
   const [trendPeriod, setTrendPeriod] = useState<TrendPeriod>("week");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [units, setUnits] = useState<UnitSystem>("metric");
+
+  // Load unit preference from localStorage on mount
+  useEffect(() => {
+    const savedUnits = localStorage.getItem("velolens-units");
+    if (savedUnits === "metric" || savedUnits === "imperial") {
+      setUnits(savedUnits);
+    }
+  }, []);
 
   const refreshStats = useCallback(async (skipCache: boolean = false) => {
     try {
@@ -103,6 +113,12 @@ export function StravaDataProvider({ children }: { children: ReactNode }) {
     if (data.trends) setTrends(data.trends);
   }, []);
 
+  const toggleUnits = useCallback(() => {
+    const newUnits = units === "metric" ? "imperial" : "metric";
+    setUnits(newUnits);
+    localStorage.setItem("velolens-units", newUnits);
+  }, [units]);
+
   const value: StravaDataContextType = {
     stats,
     activities,
@@ -111,12 +127,14 @@ export function StravaDataProvider({ children }: { children: ReactNode }) {
     trendPeriod,
     isLoading,
     error,
+    units,
     refreshStats,
     refreshActivities,
     refreshPerformance,
     refreshTrends,
     refreshAll,
     updateFromChat,
+    toggleUnits,
   };
 
   return (

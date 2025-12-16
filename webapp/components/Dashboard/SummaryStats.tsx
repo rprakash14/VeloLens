@@ -4,7 +4,7 @@ import { useStravaData } from "@/contexts/StravaDataContext";
 import StatCard from "./StatCard";
 
 export default function SummaryStats() {
-  const { stats, isLoading, error } = useStravaData();
+  const { stats, isLoading, error, units } = useStravaData();
 
   if (isLoading) {
     return (
@@ -52,6 +52,7 @@ export default function SummaryStats() {
         distance={recent.distance || 0}
         time={recent.moving_time || 0}
         elevation={recent.elevation_gain || 0}
+        units={units}
       />
       <StatCard
         title="This Year"
@@ -59,6 +60,7 @@ export default function SummaryStats() {
         distance={ytd.distance || 0}
         time={ytd.moving_time || 0}
         elevation={ytd.elevation_gain || 0}
+        units={units}
       />
       <StatCard
         title="All Time"
@@ -66,6 +68,7 @@ export default function SummaryStats() {
         distance={all_time.distance || 0}
         time={all_time.moving_time || 0}
         elevation={all_time.elevation_gain || 0}
+        units={units}
       />
     </div>
   );

@@ -1,3 +1,5 @@
+import { UnitSystem } from "@/lib/units";
+
 // Strava Activity Types
 export interface StravaActivity {
   id: number;
@@ -79,13 +81,19 @@ export interface StravaDataContextType {
   isLoading: boolean;
   error: string | null;
 
+  // Unit preferences
+  units: UnitSystem;
+
   // Methods
-  refreshStats: () => Promise<void>;
-  refreshActivities: (days?: number) => Promise<void>;
-  refreshPerformance: () => Promise<void>;
-  refreshTrends: (period?: TrendPeriod) => Promise<void>;
-  refreshAll: () => Promise<void>;
+  refreshStats: (skipCache?: boolean) => Promise<void>;
+  refreshActivities: (days?: number, skipCache?: boolean) => Promise<void>;
+  refreshPerformance: (skipCache?: boolean) => Promise<void>;
+  refreshTrends: (period?: TrendPeriod, skipCache?: boolean) => Promise<void>;
+  refreshAll: (skipCache?: boolean) => Promise<void>;
 
   // Chat integration
   updateFromChat: (data: Partial<StravaDataContextType>) => void;
+
+  // Unit toggle
+  toggleUnits: () => void;
 }
