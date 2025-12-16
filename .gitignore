@@ -1,0 +1,26 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Cursor IDE
+.cursor/
+*.mdc
+
+# Log files
+*.log
+
+# Environment files (backup)
+.env
+.env.local
+.env*.local
+
+# Temporary files
+*.tmp
+.cache/
