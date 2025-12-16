@@ -103,17 +103,22 @@ export function toESTDate(dateString: string): Date {
   return toZonedTime(new Date(dateString), TIMEZONE);
 }
 
-// Format date for chart labels (converts UTC to EST)
+// Format date for chart labels
+// Note: dateString from trends API is already in EST format (e.g., "2025-12-13")
+// We parse it directly without timezone conversion to avoid double conversion
 export function formatChartDate(dateString: string, period: "week" | "month" | "year"): string {
-  const estDate = toZonedTime(new Date(dateString), TIMEZONE);
+  // Add noon time to ensure the date doesn't shift when parsed
+  // This prevents JavaScript from interpreting "2025-12-13" as UTC midnight
+  // which would shift to the previous day when converted to EST
+  const date = new Date(dateString + "T12:00:00");
 
   switch (period) {
     case "week":
-      return format(estDate, "EEE"); // Mon, Tue, etc.
+      return format(date, "EEE"); // Mon, Tue, etc.
     case "month":
-      return format(estDate, "MMM d"); // Jan 1, etc.
+      return format(date, "MMM d"); // Jan 1, etc.
     case "year":
-      return format(estDate, "MMM"); // Jan, Feb, etc.
+      return format(date, "MMM"); // Jan, Feb, etc.
   }
 }
 
