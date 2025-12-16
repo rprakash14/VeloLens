@@ -123,4 +123,5 @@ $ curl http://localhost:3000/api/dashboard/activities?days=7
 
 **Issue Reporter:** System
 **Resolved By:** Claude Code
-**Git Commit:** (To be added when pushed)
+**Git Commit:** 20032b2
+**GitHub Repository:** https://github.com/rprakash14/VeloLens
