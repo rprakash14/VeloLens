@@ -1,11 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { toZonedTime } from "date-fns-tz";
 import axios from "axios";
+import cache, { CACHE_DURATIONS } from "@/lib/cache";
 
 const TIMEZONE = "America/New_York";
 
 export async function GET(request: NextRequest) {
   try {
+    const searchParams = request.nextUrl.searchParams;
+    const skipCache = searchParams.get("skipCache") === "true";
+
+    // Generate cache key
+    const cacheKey = "performance";
+
+    // Check cache first (unless skipCache is true)
+    if (!skipCache) {
+      const cachedData = cache.get(cacheKey);
+      if (cachedData) {
+        console.log(`[Cache HIT] ${cacheKey}`);
+        return NextResponse.json(cachedData);
+      }
+      console.log(`[Cache MISS] ${cacheKey}`);
+    }
+
     const accessToken = process.env.STRAVA_ACCESS_TOKEN;
     if (!accessToken) {
       return NextResponse.json(
@@ -74,11 +91,16 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    return NextResponse.json({
+    const result = {
       hrZones,
       powerZones,
       trainingLoad,
-    });
+    };
+
+    // Cache the result
+    cache.set(cacheKey, result, CACHE_DURATIONS.PERFORMANCE);
+
+    return NextResponse.json(result);
   } catch (error: any) {
     console.error("Performance API error:", error);
 

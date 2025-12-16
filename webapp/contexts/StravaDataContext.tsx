@@ -21,9 +21,10 @@ export function StravaDataProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const refreshStats = useCallback(async () => {
+  const refreshStats = useCallback(async (skipCache: boolean = false) => {
     try {
-      const response = await fetch("/api/dashboard/stats");
+      const url = skipCache ? "/api/dashboard/stats?skipCache=true" : "/api/dashboard/stats";
+      const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch stats");
       const data = await response.json();
       setStats(data);
@@ -34,9 +35,10 @@ export function StravaDataProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const refreshActivities = useCallback(async (days: number = 7) => {
+  const refreshActivities = useCallback(async (days: number = 7, skipCache: boolean = false) => {
     try {
-      const response = await fetch(`/api/dashboard/activities?days=${days}`);
+      const url = `/api/dashboard/activities?days=${days}${skipCache ? '&skipCache=true' : ''}`;
+      const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch activities");
       const data = await response.json();
       setActivities(data.activities);
@@ -47,9 +49,10 @@ export function StravaDataProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const refreshPerformance = useCallback(async () => {
+  const refreshPerformance = useCallback(async (skipCache: boolean = false) => {
     try {
-      const response = await fetch("/api/dashboard/performance");
+      const url = skipCache ? "/api/dashboard/performance?skipCache=true" : "/api/dashboard/performance";
+      const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch performance");
       const data = await response.json();
       setPerformance(data);
@@ -60,10 +63,11 @@ export function StravaDataProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const refreshTrends = useCallback(async (period: TrendPeriod = "week") => {
+  const refreshTrends = useCallback(async (period: TrendPeriod = "week", skipCache: boolean = false) => {
     try {
       setTrendPeriod(period);
-      const response = await fetch(`/api/dashboard/trends?period=${period}`);
+      const url = `/api/dashboard/trends?period=${period}${skipCache ? '&skipCache=true' : ''}`;
+      const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch trends");
       const data = await response.json();
       setTrends(data.trends);
@@ -74,15 +78,15 @@ export function StravaDataProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const refreshAll = useCallback(async () => {
+  const refreshAll = useCallback(async (skipCache: boolean = false) => {
     setIsLoading(true);
     setError(null);
     try {
       await Promise.all([
-        refreshStats(),
-        refreshActivities(7),
-        refreshPerformance(),
-        refreshTrends(trendPeriod),
+        refreshStats(skipCache),
+        refreshActivities(7, skipCache),
+        refreshPerformance(skipCache),
+        refreshTrends(trendPeriod, skipCache),
       ]);
     } catch (err: any) {
       setError("Failed to refresh dashboard data");

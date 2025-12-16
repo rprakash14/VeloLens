@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { subDays } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import axios from "axios";
+import cache, { CACHE_DURATIONS } from "@/lib/cache";
 
 const TIMEZONE = "America/New_York";
 
@@ -9,6 +10,20 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const days = parseInt(searchParams.get("days") || "7");
+    const skipCache = searchParams.get("skipCache") === "true";
+
+    // Generate cache key
+    const cacheKey = `activities:${days}`;
+
+    // Check cache first (unless skipCache is true)
+    if (!skipCache) {
+      const cachedData = cache.get(cacheKey);
+      if (cachedData) {
+        console.log(`[Cache HIT] ${cacheKey}`);
+        return NextResponse.json(cachedData);
+      }
+      console.log(`[Cache MISS] ${cacheKey}`);
+    }
 
     // Call Strava API directly to get activities
     const accessToken = process.env.STRAVA_ACCESS_TOKEN;
@@ -44,9 +59,14 @@ export async function GET(request: NextRequest) {
         })
       : [];
 
-    return NextResponse.json({
+    const result = {
       activities: filteredActivities,
-    });
+    };
+
+    // Cache the result
+    cache.set(cacheKey, result, CACHE_DURATIONS.ACTIVITIES);
+
+    return NextResponse.json(result);
   } catch (error: any) {
     console.error("Activities API error:", error);
 

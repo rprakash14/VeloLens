@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { format, subDays, subMonths, subYears, eachDayOfInterval, eachMonthOfInterval } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import axios from "axios";
+import cache, { CACHE_DURATIONS } from "@/lib/cache";
 
 const TIMEZONE = "America/New_York";
 
@@ -9,6 +10,20 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const period = searchParams.get("period") || "week";
+    const skipCache = searchParams.get("skipCache") === "true";
+
+    // Generate cache key
+    const cacheKey = `trends:${period}`;
+
+    // Check cache first (unless skipCache is true)
+    if (!skipCache) {
+      const cachedData = cache.get(cacheKey);
+      if (cachedData) {
+        console.log(`[Cache HIT] ${cacheKey}`);
+        return NextResponse.json(cachedData);
+      }
+      console.log(`[Cache MISS] ${cacheKey}`);
+    }
 
     const accessToken = process.env.STRAVA_ACCESS_TOKEN;
     if (!accessToken) {
@@ -101,7 +116,12 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    return NextResponse.json({ trends });
+    const result = { trends };
+
+    // Cache the result
+    cache.set(cacheKey, result, CACHE_DURATIONS.TRENDS);
+
+    return NextResponse.json(result);
   } catch (error: any) {
     console.error("Trends API error:", error);
 

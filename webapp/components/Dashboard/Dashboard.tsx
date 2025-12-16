@@ -25,7 +25,7 @@ export default function Dashboard() {
             <p className="text-sm opacity-90">Your Strava activity analytics</p>
           </div>
           <button
-            onClick={() => refreshAll()}
+            onClick={() => refreshAll(true)}
             disabled={isLoading}
             className="bg-white/20 hover:bg-white/30 disabled:bg-white/10 px-4 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2"
           >
