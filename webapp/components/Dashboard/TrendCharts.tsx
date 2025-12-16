@@ -9,8 +9,6 @@ import {
   Line,
   BarChart,
   Bar,
-  AreaChart,
-  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -163,18 +161,13 @@ export default function TrendCharts() {
         <div>
           <h4 className="text-sm font-semibold text-gray-700 mb-2">Activity Count</h4>
           <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={chartData}>
+            <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="label" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip labelStyle={{ color: "#374151" }} />
-              <Area
-                type="monotone"
-                dataKey="activity_count"
-                stroke="#8b5cf6"
-                fill="#c4b5fd"
-              />
-            </AreaChart>
+              <Bar dataKey="activity_count" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
+            </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
